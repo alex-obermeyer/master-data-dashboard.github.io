@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Q3 Data Sync Goals Dashboard</title>
+    <link rel="stylesheet" href="styles.css?v=20260825-005" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">2026 goal review</p>
+          <h1>Data Sync Goals Dashboard</h1>
+        </div>
+        <div class="source-note">
+          <span>Completeness</span>
+          <span>New item setup</span>
+          <span>Item requests</span>
+          <span>Severe errors</span>
+        </div>
+      </header>
+
+      <nav class="tabbar" aria-label="Dashboard sections">
+        <button class="tab active" type="button" data-view="overview">Overview</button>
+        <button class="tab" type="button" data-view="completeness">Completeness</button>
+        <button class="tab" type="button" data-view="setup">New Item Setup</button>
+        <button class="tab" type="button" data-view="requests">Item Requests</button>
+        <button class="tab" type="button" data-view="severe">Severe Errors</button>
+      </nav>
+
+      <main>
+        <section class="view active" id="overview">
+          <div class="section-heading overview-heading">
+            <div>
+              <p class="eyebrow">MDA result overview</p>
+              <h2>Selected MDA snapshot</h2>
+            </div>
+            <div class="toolbar">
+              <select id="overview-mda" aria-label="Choose MDA for overview"></select>
+            </div>
+          </div>
+
+          <div class="mda-summary-bar">
+            <div>
+              <p class="label">Selected MDA</p>
+              <strong id="overview-selected-mda">MDA</strong>
+            </div>
+            <p id="overview-selected-copy"></p>
+          </div>
+
+          <div class="overview-card-grid" id="overview-scorecards"></div>
+
+          <section class="panel overview-request-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>MDA completion queue</h2>
+                <span class="muted">Item requests still missing an MDA completion date</span>
+              </div>
+            </div>
+            <div class="drilldown-summary" id="overview-request-summary"></div>
+            <div class="table-wrap overview-request-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Request</th>
+                    <th>Status</th>
+                    <th>Supplier</th>
+                    <th>Item</th>
+                    <th>Dates</th>
+                    <th>Open</th>
+                  </tr>
+                </thead>
+                <tbody id="overview-request-table"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="split-layout overview-detail-layout overview-completeness-layout">
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Completeness supplier gaps</h2>
+                  <span class="muted">Largest incomplete counts for selected MDA</span>
+                </div>
+              </div>
+              <div class="table-wrap compact">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Supplier</th>
+                      <th>Complete</th>
+                      <th>Incomplete</th>
+                      <th>% Complete</th>
+                    </tr>
+                  </thead>
+                  <tbody id="overview-supplier-gaps"></tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+
+          <section class="split-layout overview-detail-layout">
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>New item setup suppliers</h2>
+                  <span class="muted">Slowest supplier cycle times</span>
+                </div>
+              </div>
+              <div class="table-wrap compact">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Supplier</th>
+                      <th>Completed</th>
+                      <th>MDA days</th>
+                      <th>Overall</th>
+                    </tr>
+                  </thead>
+                  <tbody id="overview-setup-suppliers"></tbody>
+                </table>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Severe error profile</h2>
+                  <span class="muted">Current item-level error categories</span>
+                </div>
+              </div>
+              <div id="overview-severe-list" class="stack-list"></div>
+            </article>
+          </section>
+
+        </section>
+
+        <section class="view" id="completeness">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Goal 1</p>
+              <h2>Completeness against P8 target</h2>
+            </div>
+            <div class="toolbar">
+              <button class="seg active" type="button" data-completeness-view="total">Total items</button>
+              <button class="seg" type="button" data-completeness-view="new">New items</button>
+              <select id="completeness-mda" aria-label="Choose MDA for completeness drilldowns"></select>
+              <input id="completeness-search" type="search" placeholder="Search MDA" />
+              <select id="completeness-sort" aria-label="Sort completeness table">
+                <option value="gap-desc">Largest gap</option>
+                <option value="pct-asc">Lowest completion</option>
+                <option value="items-desc">Most items</option>
+              </select>
+            </div>
+          </div>
+          <div class="kpi-row" id="completeness-kpis"></div>
+          <div class="panel">
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>MDA</th>
+                    <th>Complete</th>
+                    <th>Goal</th>
+                    <th>Gap</th>
+                    <th>Progress</th>
+                  </tr>
+                </thead>
+                <tbody id="completeness-table"></tbody>
+              </table>
+            </div>
+          </div>
+          <section class="split-layout supplier-layout">
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Supplier breakdown</h2>
+                  <span class="muted">All suppliers by selected MDA</span>
+                </div>
+                <div class="toolbar">
+                  <select id="supplier-sort" aria-label="Sort supplier breakdown">
+                    <option value="incomplete-desc">Most incomplete</option>
+                    <option value="pct-asc">Lowest completion</option>
+                    <option value="items-desc">Most items</option>
+                  </select>
+                </div>
+              </div>
+              <div class="table-wrap supplier-table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Supplier</th>
+                      <th>Complete</th>
+                      <th>Incomplete</th>
+                      <th>% Complete</th>
+                      <th>Progress</th>
+                    </tr>
+                  </thead>
+                  <tbody id="supplier-table"></tbody>
+                </table>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading">
+                <h2>Supplier focus</h2>
+                <span class="muted">Selected MDA</span>
+              </div>
+              <div id="supplier-focus" class="stack-list"></div>
+            </article>
+          </section>
+          <section class="panel drilldown-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Item missing elements</h2>
+                <span class="muted" id="item-drilldown-label">Incomplete P8 items by MDA, supplier, and missing element</span>
+              </div>
+              <div class="toolbar">
+                <select id="item-supplier" aria-label="Choose supplier for item drilldown"></select>
+                <select id="item-element" aria-label="Choose missing element">
+                  <option value="">All missing elements</option>
+                </select>
+                <input id="item-search" type="search" placeholder="Search item, GTIN, DOT" />
+              </div>
+            </div>
+            <div class="drilldown-summary" id="item-summary"></div>
+            <div class="table-wrap item-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>DOT item</th>
+                    <th>GTIN</th>
+                    <th>Supplier</th>
+                    <th>Description</th>
+                    <th>Missing elements</th>
+                  </tr>
+                </thead>
+                <tbody id="item-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="setup">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Goal 2</p>
+              <h2>New item setup cycle time</h2>
+            </div>
+            <div class="toolbar">
+              <button class="seg active" type="button" data-setup-view="mda">MDA</button>
+              <button class="seg" type="button" data-setup-view="ma">MA</button>
+              <button class="seg active" type="button" data-setup-scope="total">Total days</button>
+              <button class="seg" type="button" data-setup-scope="itemManager">Item manager days</button>
+              <button class="seg active" type="button" data-setup-goal="mda">MDA goal</button>
+              <button class="seg" type="button" data-setup-goal="overall">Total goal</button>
+              <select id="setup-sort" aria-label="Sort setup table">
+                <option value="metric-desc">Longest goal days</option>
+                <option value="completed-desc">Most completed</option>
+                <option value="mda-asc" selected>Fastest MDA days</option>
+                <option value="ma-asc">Fastest item manager days</option>
+              </select>
+            </div>
+          </div>
+          <div class="kpi-row" id="setup-kpis"></div>
+          <section class="split-layout">
+            <article class="panel">
+              <div class="panel-heading">
+                <h2>Cycle-time ranking</h2>
+                <span class="muted" id="setup-mode-label">MDA summary</span>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Completed</th>
+                      <th>MDA days</th>
+                      <th>MDA level</th>
+                      <th>MA days</th>
+                      <th>Total days</th>
+                      <th>Total level</th>
+                      <th>Open load</th>
+                    </tr>
+                  </thead>
+                  <tbody id="setup-table"></tbody>
+                </table>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading">
+                <h2>Goal levels</h2>
+                <span class="muted">L1-L5 comparison</span>
+              </div>
+              <div id="setup-bands"></div>
+            </article>
+          </section>
+          <section class="split-layout supplier-layout">
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <h2>Supplier hold-up view</h2>
+                  <span class="muted">Open load and completed-cycle timing by MDA</span>
+                </div>
+                <div class="toolbar">
+                  <select id="setup-supplier-mda" aria-label="Choose MDA for setup supplier breakdown"></select>
+                  <select id="setup-supplier-sort" aria-label="Sort setup supplier breakdown">
+                    <option value="open-desc">Most open</option>
+                    <option value="not-approved-desc">Most not approved</option>
+                    <option value="metric-desc">Longest selected days</option>
+                    <option value="completed-desc">Most completed</option>
+                  </select>
+                </div>
+              </div>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Supplier</th>
+                      <th>Total</th>
+                      <th>Completed</th>
+                      <th>Open</th>
+                      <th>Not approved</th>
+                      <th>MDA days</th>
+                      <th>MA days</th>
+                      <th>Total days</th>
+                    </tr>
+                  </thead>
+                  <tbody id="setup-supplier-table"></tbody>
+                </table>
+              </div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading">
+                <h2>Hold-up focus</h2>
+                <span class="muted">Selected MDA</span>
+              </div>
+              <div id="setup-supplier-focus" class="stack-list"></div>
+            </article>
+          </section>
+        </section>
+
+        <section class="view" id="requests">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">MDA workspace</p>
+              <h2>Item request status</h2>
+            </div>
+            <div class="toolbar">
+              <select id="request-mda" aria-label="MDA queue"></select>
+              <select id="request-status" aria-label="Filter requests by status">
+                <option value="">All statuses</option>
+              </select>
+              <select id="request-type" aria-label="Filter requests by request type">
+                <option value="">All request types</option>
+              </select>
+              <select id="request-risk" aria-label="Filter requests by due date">
+                <option value="">All due dates</option>
+                <option value="overdue">Overdue</option>
+                <option value="today">Due today</option>
+                <option value="soon">Due in 2 days</option>
+                <option value="future">Future due</option>
+              </select>
+              <input id="request-search" type="search" placeholder="Search supplier, item, GTIN" />
+            </div>
+          </div>
+          <div class="portal-banner">
+            <div>
+              <p class="label">Viewing queue for</p>
+              <strong id="request-signed-in">MDA</strong>
+              <span class="muted" id="request-viewer-note">Choose an MDA queue to view</span>
+            </div>
+            <div>
+              <p class="label">Export date</p>
+              <strong id="request-export-date">Aug 10, 2026</strong>
+            </div>
+            <div>
+              <p class="label">Source</p>
+              <strong id="request-source">Static request export</strong>
+            </div>
+          </div>
+          <div class="kpi-row" id="request-kpis"></div>
+          <section class="split-layout request-layout">
+            <article class="panel">
+              <div class="panel-heading">
+                <h2>Status board</h2>
+                <span class="muted">Selected MDA queue</span>
+              </div>
+              <div id="request-status-board" class="status-board"></div>
+            </article>
+            <article class="panel">
+              <div class="panel-heading">
+                <h2>Queue focus</h2>
+                <span class="muted">Current filters</span>
+              </div>
+              <div id="request-focus" class="stack-list"></div>
+            </article>
+          </section>
+          <section class="panel drilldown-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Request queue</h2>
+                <span class="muted">In-process item requests assigned to the signed-in MDA</span>
+              </div>
+              <div class="toolbar">
+                <select id="request-sort" aria-label="Sort request queue">
+                  <option value="target-asc">Next target date</option>
+                  <option value="age-desc">Oldest open</option>
+                  <option value="status-asc">Status</option>
+                  <option value="supplier-asc">Supplier</option>
+                </select>
+              </div>
+            </div>
+            <div class="drilldown-summary" id="request-summary"></div>
+            <div class="table-wrap request-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Request</th>
+                    <th>Status</th>
+                    <th>Supplier</th>
+                    <th>Item</th>
+                    <th>Dates</th>
+                    <th>Open</th>
+                    <th>Requestor</th>
+                    <th>Notes</th>
+                  </tr>
+                </thead>
+                <tbody id="request-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="severe">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Goal 3</p>
+              <h2>Severe errors weekly control</h2>
+            </div>
+            <div class="toolbar">
+              <select id="severe-sort" aria-label="Sort severe error table">
+                <option value="errors-desc">Most severe errors</option>
+                <option value="items-desc">Most items</option>
+                <option value="delta-desc">Largest increase</option>
+                <option value="delta-asc">Largest decrease</option>
+              </select>
+            </div>
+          </div>
+          <div class="kpi-row" id="severe-kpis"></div>
+          <section class="split-layout trend-layout">
+            <article class="panel">
+              <div class="panel-heading">
+                <h2>Weekly movement</h2>
+                <span class="muted">Items and total errors</span>
+              </div>
+              <canvas id="severe-chart" width="880" height="360" aria-label="Severe error weekly movement"></canvas>
+            </article>
+            <article class="panel">
+              <div class="panel-heading">
+                <h2>Latest week by analyst</h2>
+                <span class="muted">Jul 13, 2026</span>
+              </div>
+              <div class="table-wrap compact">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>MDA</th>
+                      <th>Items</th>
+                      <th>Errors</th>
+                      <th>WoW</th>
+                    </tr>
+                  </thead>
+                  <tbody id="severe-table"></tbody>
+                </table>
+              </div>
+            </article>
+          </section>
+          <section class="panel drilldown-panel">
+            <div class="panel-heading">
+              <div>
+                <h2>Severe error item list</h2>
+                <span class="muted">Items to clear by MDA and error category</span>
+              </div>
+              <div class="toolbar">
+                <select id="severe-item-mda" aria-label="Choose MDA for severe error items"></select>
+                <select id="severe-item-type" aria-label="Choose severe error type">
+                  <option value="">All error types</option>
+                </select>
+                <input id="severe-item-search" type="search" placeholder="Search item, supplier, GTIN" />
+              </div>
+            </div>
+            <div class="drilldown-summary" id="severe-item-summary"></div>
+            <div class="table-wrap item-table">
+              <table>
+                <thead>
+                  <tr>
+                    <th>DOT item</th>
+                    <th>GTIN</th>
+                    <th>Supplier</th>
+                    <th>Description</th>
+                    <th>Error categories</th>
+                    <th>Messages</th>
+                  </tr>
+                </thead>
+                <tbody id="severe-item-table"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+    <script src="completeness-suppliers.js?v=20260825-005"></script>
+    <script src="completeness-items.js?v=20260825-005"></script>
+    <script src="new-item-completeness.js?v=20260825-005"></script>
+    <script src="severe-items.js?v=20260825-005"></script>
+    <script src="setup-breakdown.js?v=20260825-008"></script>
+    <script src="setup-suppliers.js?v=20260825-008"></script>
+    <script src="item-requests.js?v=20260825-008"></script>
+    <script src="app.js?v=20260825-008"></script>
+  </body>
+</html>
